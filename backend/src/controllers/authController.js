@@ -45,6 +45,15 @@ console.log(req.file);
         role,
         profileImage:imageUrl,
       },
+       select: {
+    id: true,
+    firstName: true,
+    lastName: true,
+    email: true,
+    role: true,
+    profileImage: true,
+    createdAt: true,
+  },
     });
 
     res.status(201).json({
@@ -128,8 +137,14 @@ res.status(200).json({message:"profile fetched successfully",profile})
 const updateProfile=async(req,res)=>{
     try{
         const id=req.user.userId;
-        const{firstName,lastName,profileImage}=req.body;
-if(!firstName||!lastName){
+        const{firstName,lastName}=req.body;
+ 
+    let imageUrl=null;
+    if(req.file){
+    const uploadedImage=await uploadToCloudinary(req.file.buffer);
+    imageUrl=uploadedImage.secure_url
+}
+    if(!firstName||!lastName){
     return res.status(400).json({message:"please fill all the fields"})
 }
         const profile=await prisma.user.update({
@@ -137,8 +152,17 @@ if(!firstName||!lastName){
                 id:id,
             },
 data:{
-    firstName,lastName,profileImage
-}
+    firstName,lastName,...(imageUrl&& {profileImage:imageUrl})
+},
+select: {
+    id: true,
+    firstName: true,
+    lastName: true,
+    email: true,
+    role: true,
+    profileImage: true,
+    createdAt: true,
+},
 
         })
  
@@ -167,9 +191,11 @@ const passwordChange=async(req,res)=>{
         const olduser=await prisma.user.findUnique({
             where:{
                 id
-            }
-
-        })
+            },
+select: {
+    password:true,
+}
+    ,    })
 
         if(!olduser){
             return res.status(404).json({message:"no user found"})
@@ -193,10 +219,107 @@ res.status(200).json({message:"password changed successfully",user})
         res.status(500).json({message:"SERVER ERROR",error:err.message})
     }
 }
+
+const changeEmail = async (req, res) => {
+  try {
+    const id = req.user.userId;
+
+    const { newEmail, password } = req.body;
+
+    // Validate input
+    if (!newEmail || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "New email and password are required.",
+      });
+    }
+
+    // Get current user's password and email
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Check if password is correct
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password.",
+      });
+    }
+
+    // Check if new email is the same as the current one
+    if (user.email === newEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "New email cannot be the same as the current email.",
+      });
+    }
+
+    // Check if another user already has this email
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: newEmail,
+      },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Email is already registered.",
+      });
+    }
+
+    // Update email
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        email: newEmail,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        profileImage: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Email updated successfully.",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
 module.exports = {
   registerUser,
 signIn,
 getProfile,
 updateProfile,
 passwordChange,
-};
+changeEmail,};
