@@ -96,7 +96,18 @@ const token=JWT.sign({
     email:existingEmail.email,
     role:existingEmail.role,
 },JWT_SECRET,{expiresIn:"1h"})
-res.status(200).json({message:"signin Successfull",user:{email:existingEmail.email,id:existingEmail.id,role:existingEmail.role},token})
+res.status(200).json({
+  message: "Signin Successful",
+  token,
+  user: {
+    id: existingEmail.id,
+    firstName: existingEmail.firstName,
+    lastName: existingEmail.lastName,
+    email: existingEmail.email,
+    role: existingEmail.role,
+    profileImage: existingEmail.profileImage,
+  },
+});
 }catch(err){
 res.status(500).json({message:"SERVER ERROR",error:err.message})
 }

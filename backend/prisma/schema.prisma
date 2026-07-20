@@ -14,7 +14,7 @@ model User {
   lastName  String
   email     String   @unique
   password  String
-  role      String
+  role      Role
   createdAt DateTime @default(now())
 }
 
@@ -25,4 +25,51 @@ model Patient {
   age       Int
   gender    String
   createdAt DateTime @default(now())
+}
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+model Doctor {
+  id              String   @id @default(cuid())
+
+  firstName       String
+  lastName        String
+
+  email           String   @unique
+  phone           String   @unique
+
+  gender          Gender
+
+  specialization  String
+
+  experience      Int
+
+  qualification   String
+
+  consultationFee Decimal  @db.Decimal(10,2)
+
+  profileImage    String?
+
+  address         String?
+
+  city            String?
+
+  state           String?
+
+  country         String?
+
+  postalCode      String?
+
+  isAvailable     Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
