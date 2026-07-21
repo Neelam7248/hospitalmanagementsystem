@@ -8,16 +8,21 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id           String   @id @default(cuid())
   profileImage String?
-  firstName String
-  lastName  String
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-}
 
+  firstName    String
+  lastName     String
+
+  email        String   @unique
+  password     String
+
+  role         Role
+
+  doctor       Doctor?
+
+  createdAt    DateTime @default(now())
+}
 
 model Patient {
   id        Int      @id @default(autoincrement())
@@ -35,10 +40,9 @@ enum Role {
 model Doctor {
   id              String   @id @default(cuid())
 
-  firstName       String
-  lastName        String
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
 
-  email           String   @unique
   phone           String   @unique
 
   gender          Gender
@@ -49,21 +53,15 @@ model Doctor {
 
   qualification   String
 
-  consultationFee Decimal  @db.Decimal(10,2)
-
-  profileImage    String?
+  consultationFee Decimal @db.Decimal(10,2)
 
   address         String?
-
   city            String?
-
   state           String?
-
   country         String?
-
   postalCode      String?
 
-  isAvailable     Boolean  @default(true)
+  isAvailable     Boolean @default(true)
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
