@@ -76,7 +76,7 @@ if (!     firstName    ||
 
   !qualification ||
   !  consultationFee ||
-
+!password ||
   !address   ||      
 
   !city           ||
@@ -127,11 +127,12 @@ const doctor = await tx.doctor.create({
     state,
     country,
     postalCode,
-    isAvailable,
+    isAvailable: isAvailable === "true",
   },
 });
-})
 return doctor;
+})
+
 return res.status(201).json({
   message: "Doctor created successfully",
   doctor,
