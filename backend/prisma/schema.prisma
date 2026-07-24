@@ -2,10 +2,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 
 model User {
   id           String   @id @default(cuid())
@@ -24,19 +26,14 @@ model User {
   createdAt    DateTime @default(now())
 }
 
-model Patient {
-  id        Int      @id @default(autoincrement())
-  name      String
-  age       Int
-  gender    String
-  createdAt DateTime @default(now())
-}
 enum Role {
   SUPER_ADMIN
   ADMIN
   DOCTOR
   PATIENT
 }
+
+
 model Doctor {
   id              String   @id @default(cuid())
 
@@ -63,11 +60,43 @@ model Doctor {
 
   isAvailable     Boolean @default(true)
 
+  documents       DoctorDocument[]
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
 enum Gender {
   MALE
   FEMALE
   OTHER
+}
+
+model DoctorDocument {
+
+  id           String @id @default(cuid())
+
+  doctorId     String
+  doctor       Doctor @relation(fields:[doctorId], references:[id], onDelete: Cascade)
+
+  documentType DocumentType
+
+  originalName String
+
+  fileName     String
+
+  fileKey      String @unique
+
+  mimeType     String
+
+  fileSize     Int
+
+  uploadedAt   DateTime @default(now())
+}
+
+enum DocumentType{
+  CV
+  DEGREE
+  LICENSE
+  CERTIFICATE
 }

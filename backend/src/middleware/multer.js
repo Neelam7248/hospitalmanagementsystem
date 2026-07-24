@@ -2,13 +2,11 @@ const multer = require("multer");
 
 const storage = multer.memoryStorage();
 
-const imageValidation=require("../middleware/imageValidation");
 const upload = multer({
-   storage,
-   fileFilter:imageValidation,
-   limits: {
-      fileSize: 5 * 1024 * 1024
-   }
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB
+  },
 });
 
 module.exports = upload;

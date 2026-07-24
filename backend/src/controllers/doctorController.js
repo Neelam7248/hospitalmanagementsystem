@@ -1,11 +1,12 @@
 const prisma = require("../config/prisma");
 const bcrypt = require("bcrypt");
-const uploadToCloudinary = require("../utils/cloudinaryUploadLogic");
-
+const uploadDoctorDocuments = require("../utils/uploadDoctorDocuments");
+const createDoctorDocuments = require("../services/doctorDocumentServices");
 const addDoctor=async(req,res)=>{
     try{
+      
         const id=req.user.userId;
-    const authUser=await prisma.user.findUnique({where:{
+        const authUser=await prisma.user.findUnique({where:{
         id
     },
     select:{
@@ -28,10 +29,10 @@ if (
   });
 }        const{
             firstName    ,
-  lastName       ,
-  email           ,
-  phone           ,
-password,
+  lastName, email, phone           ,
+
+ password,
+ 
   gender          ,
   specialization  ,
 
@@ -54,22 +55,12 @@ password,
 
   }=req.body;
 
-  let imageUrl = null;
-
-if (req.file) {
-  const uploadedImage = await uploadToCloudinary(req.file.buffer);
-  imageUrl = uploadedImage.secure_url;
-}
-  
-console.log(req.file);
 
 if (!     firstName    ||
   !lastName       ||
   !email           ||
   !phone           ||
-
-
-  !gender          ||
+ !gender          ||
   !specialization  ||
 
   !experience      ||
@@ -102,37 +93,71 @@ if (existingEmail){
     return res. status(409).json ({message:"Email is already registered  in db"})
 }
 const hashedPassword=await bcrypt.hash(password,10);
-const doctor= await prisma.$transaction(async(tx)=>{
-const user = await tx.user.create({
-  data: {
-    firstName,
-    lastName,
-    email,
-    password: hashedPassword,
-    role: "DOCTOR",
-    profileImage: imageUrl,
-  },
-});
-const doctor = await tx.doctor.create({
-  data: {
-    userId: user.id,
-    phone,
-    gender,
-    specialization,
-    experience: Number(experience),
-    qualification,
-    consultationFee,
-    address,
-    city,
-    state,
-    country,
-    postalCode,
-    isAvailable: isAvailable === "true",
-  },
-});
-return doctor;
-})
+// Prisma transaction
 
+const {
+  imageUrl,
+  cvData,
+  degreeData,
+  licenseData,
+  certificateData,
+} = await uploadDoctorDocuments(req.files);
+
+
+
+const doctor = await prisma.$transaction(async (tx) => {
+  const user = await tx.user.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role: "DOCTOR",
+      profileImage: imageUrl,
+    },
+  });
+
+const doctor= await tx.doctor.create({
+    data: {
+      userId: user.id,
+      phone,
+      gender,
+      specialization,
+      experience: Number(experience),
+      qualification,
+      consultationFee,
+      address,
+      city,
+      state,
+      country,
+      postalCode,
+      isAvailable: isAvailable === "true",
+      
+      
+    },
+  });
+const documents = createDoctorDocuments(
+  doctor.id,
+  cvData,
+  degreeData,
+  licenseData,
+  certificateData,
+);
+  await tx.doctorDocument.createMany({
+  data: documents,
+});
+
+return await tx.doctor.findUnique({
+    where:{
+      id: doctor.id
+    },
+    include:{
+      documents:true
+    }
+  });
+
+
+});
 return res.status(201).json({
   message: "Doctor created successfully",
   doctor,
@@ -144,4 +169,90 @@ success:false
     })
 }  
 }
-module.exports={addDoctor,};
+
+
+
+
+//get all user
+const getAllDoctors = async (req, res) => {
+  try {
+    const doctors = await prisma.doctor.findMany({
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            profileImage: true,
+          },
+        },
+        documents: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      totalDoctors: doctors.length,
+      doctors,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "SERVER ERROR",
+      error: err.message,
+    });
+  }
+};
+
+
+//get one dr by id
+const getDoctorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const doctor = await prisma.doctor.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            profileImage: true,
+          },
+        },
+        documents: true,
+      },
+    });
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      doctor,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "SERVER ERROR",
+      error: err.message,
+    });
+  }
+};
+
+
+module.exports = {
+  addDoctor,
+  getAllDoctors,
+  getDoctorById,
+};

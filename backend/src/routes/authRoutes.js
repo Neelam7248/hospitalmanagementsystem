@@ -5,7 +5,24 @@ const { registerUser, signIn ,getProfile,updateProfile, passwordChange, changeEm
 
 const upload = require("../middleware/multer");
 
-router.post("/register",upload.single("profileImage"), registerUser);
+router.post("/register",upload.fields([
+  {
+    name: "profileImage",
+    maxCount: 1,
+  },
+  {
+    name: "cv",
+    maxCount: 1,
+  },
+  {
+    name: "degree",
+    maxCount: 1,
+  },
+  {
+    name: "license",
+    maxCount: 1,
+  },
+]), registerUser);
 router.post("/signIn",signIn);
 router.get("/getProfile",auth,getProfile);
 router.post("/updateProfile",auth,updateProfile);
