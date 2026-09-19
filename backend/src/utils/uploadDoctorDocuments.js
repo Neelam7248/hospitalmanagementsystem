@@ -30,8 +30,12 @@ let certificateData=null;
     });
 
 
-    cvData = {originalName: cv.originalname,fileName:uploadedCV.fileName,
-        fileKey:uploadedCV.fileKey,mimeType:uploadedCV.mimeType,fileSize:uploadedCV.fileSize};
+    cvData = {originalName: cv.originalname,
+      fileName:uploadedCV.fileName,
+        fileKey:uploadedCV.fileKey,
+        mimeType:uploadedCV.mimeType,
+        fileSize:uploadedCV.fileSize,
+        documentUrl:uploadedCV.url};
   }
 
   // ==========================
@@ -45,7 +49,12 @@ let certificateData=null;
       allowedTypes: ["application/pdf"],
     });
 
-    degreeData ={originalName:degree.originalname,fileName:uploadedDegree.fileName,fileKey:uploadedDegree.fileKey,mimeType:uploadedDegree.mimeType,fileSize:uploadedDegree.fileSize}
+    degreeData ={originalName:degree.originalname,
+      fileName:uploadedDegree.fileName,
+      fileKey:uploadedDegree.fileKey,
+      mimeType:uploadedDegree.mimeType,
+      fileSize:uploadedDegree.fileSize,
+     documentUrl: uploadedDegree.url,}
   }
 
   // ==========================
@@ -59,7 +68,12 @@ let certificateData=null;
       allowedTypes: ["application/pdf"],
     });
 
-    licenseData = {originalName:license.originalname,fileName:uploadedLicense.fileName,fileKey:uploadedLicense.fileKey,mimeType:uploadedLicense.mimeType,fileSize:uploadedLicense.fileSize}
+    licenseData = {originalName:license.originalname,
+      fileName:uploadedLicense.fileName,
+      fileKey:uploadedLicense.fileKey,
+      mimeType:uploadedLicense.mimeType,
+      fileSize:uploadedLicense.fileSize,
+     documentUrl: uploadedLicense.url,}
   }
 
   // Medical License
@@ -72,7 +86,12 @@ let certificateData=null;
       allowedTypes: ["application/pdf"],
     });
 
-    certificateData = {originalName:certificate.originalname,fileName:uploadedCertificate.fileName,fileKey:uploadedCertificate.fileKey,mimeType:uploadedCertificate.mimeType,fileSize:uploadedCertificate.fileSize}
+    certificateData = {originalName:certificate.originalname,
+      fileName:uploadedCertificate.fileName,
+      fileKey:uploadedCertificate.fileKey,
+      mimeType:uploadedCertificate.mimeType,
+      fileSize:uploadedCertificate.fileSize,
+     documentUrl: uploadedCertificate.url,}
   }
 
   return {

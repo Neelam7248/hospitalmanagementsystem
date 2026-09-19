@@ -1,15 +1,24 @@
-# Backend
-backend/node_modules/
-backend/.env
+# Dependencies
+**/node_modules/
 
-# Frontend
-client/node_modules/
-client/.next/
-client/.env
+# Environment variables
+**/.env
+**/.env.*
 
-# Prisma (if using custom output)
+# Frontend / Next.js
+**/.next/
+
+# Prisma generated files
 backend/src/generated/prisma/
+
+# Lambda / build output
+**/dist/
+**/build/
 
 # OS files
 .DS_Store
 Thumbs.db
+**/node_modules_windows/
+# Lambda generated packages
+**/lambda-package.zip
+**/prisma-layer.zip

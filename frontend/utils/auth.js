@@ -17,14 +17,18 @@ export const getToken = () => {
 
   return sessionStorage.getItem(TOKEN_KEY);
 };
-
-// Get user
 export const getUser = () => {
   if (typeof window === "undefined") return null;
 
   const user = sessionStorage.getItem(USER_KEY);
 
-  return user ? JSON.parse(user) : null;
+  console.log("USER FROM SESSION:", user);
+
+  if (!user || user === "undefined") {
+    return null;
+  }
+
+  return JSON.parse(user);
 };
 
 // Logged in?

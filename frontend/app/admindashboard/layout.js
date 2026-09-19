@@ -55,6 +55,14 @@ export default function AdminDashboardLayout({ children }) {
             Dashboard
           </Link>
 
+<Link
+  href="/admindashboard/profile"
+  className="block p-3 rounded-lg hover:bg-gray-700"
+>
+  Profile
+</Link>
+
+
           <Link
             href="/admindashboard/doctors"
             className="block p-3 rounded-lg hover:bg-gray-700"

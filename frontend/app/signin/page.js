@@ -38,9 +38,10 @@ const [formData, setFormData] = useState({
 
 try{
      
-    const res=await axios.post(`${BACKEND_URL}/api/v1/auth/signIn`,formData);
+    const res=await axios.post(`${BACKEND_URL}/api/v1/auth/signin`,formData);
     if(res.data){
     setMessage("signin Successful");
+    console.log("SIGNIN RESPONSE:", !!res.data);
 saveAuthData(res.data.token, res.data.user);
 navigate.push("/admindashboard");
     }
@@ -48,13 +49,15 @@ navigate.push("/admindashboard");
 
 
 
-}catch(err){
-    setError(err?.response?.data?.message);
-    console.log(err?.response?.data?.message);
-}finally{
-    setLoading(false);
-}
-}
+} catch (err) {
+  console.log("STATUS:", err?.response?.status);
+  console.log("RESPONSE DATA:", err?.response?.data);
+  console.log("FULL ERROR:", err);
+
+  setError(err?.response?.data?.message || "Signin failed");
+} finally {
+  setLoading(false);
+}}
 
 
   return (

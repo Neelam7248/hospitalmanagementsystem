@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id           String   @id @default(cuid())
+  profileImage String?
+
+  firstName    String
+  lastName     String
+
+  email        String   @unique
+  password     String
+
+  role         Role
+
+  doctor       Doctor?
+  createdAt    DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+    @@index([firstName])
+  @@index([lastName])
+
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  DOCTOR
+}
+
+
+model Doctor {
+  id              String   @id @default(cuid())
+
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+
+  phone           String   @unique
+
+  gender          Gender
+
+  specialization  String
+
+  experience      Int
+
+  qualification   String
+
+  consultationFee Decimal @db.Decimal(10,2)
+
+  address         String?
+  city            String?
+  state           String?
+  country         String?
+  postalCode      String?
+
+  isAvailable     Boolean @default(true)
+isDeleted Boolean  @default(false)
+deletedAt DateTime?
+  documents       DoctorDocument[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+
+ @@index([specialization])
+  @@index([isDeleted])
+  @@index([isAvailable])
+
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model DoctorDocument {
+
+  id           String @id @default(cuid())
+
+  doctorId     String
+  doctor       Doctor @relation(fields:[doctorId], references:[id], onDelete: Cascade)
+
+  documentType DocumentType
+
+  originalName String
+
+  fileName     String
+
+  fileKey      String @unique
+
+  mimeType     String
+ documentUrl   String ?
+  fileSize     Int
+
+  uploadedAt   DateTime @default(now())
+ @@index([doctorId])
+}
+
+enum DocumentType{
+  CV
+  DEGREE
+  LICENSE
+  CERTIFICATE
+}
+
+//PATIENT model
+ model Patient{
+  id           String   @id @default(cuid())
+ 
+ medicalRecordNumber String @unique
+  profileImage String?
+
+  firstName    String
+  lastName     String
+phone String?
+  email        String?   
+   bloodGroup BloodGroup
+maritalStatus MaritalStatus
+ 
+     gender Gender
+
+    dateOfBirth DateTime
+
+address String?
+city String?
+state String?
+country String?
+postalCode String?
+emergencyContactName String?
+emergencyContactPhone String?
+status PatientStatus   @default(ACTIVE)
+isDeleted Boolean  @default(false)
+deletedAt DateTime?
+  documents       PatientDocument[]
+createdAt DateTime @default(now())
+updatedAt  DateTime @updatedAt
+
+  @@index([firstName])
+  @@index([lastName])
+  @@index([status])
+  @@index([isDeleted])
+  @@index([bloodGroup])
+ }
+ enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
+
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  DECEASED
+}
+model PatientDocument {
+
+  id           String   @id @default(cuid())
+
+  patientId    String
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  documentType PatientDocumentType
+
+  originalName String
+
+  fileName     String
+
+  fileKey      String   @unique
+
+  mimeType     String
+
+  documentUrl  String?
+
+  fileSize     Int
+
+  uploadedAt   DateTime @default(now())
+  @@index([patientId])
+}
+
+
+enum PatientDocumentType {
+  MEDICAL_REPORT
+  PRESCRIPTION
+  LAB_REPORT
+  XRAY
+  MRI
+  CT_SCAN
+  ULTRASOUND
+  INSURANCE
+  ID_PROOF
+  OTHER
+}
